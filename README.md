@@ -1,2 +1,2 @@
-# CourseEnrollmentChecker
-CourseEnrollmentChecker is a Selenium automation script designed to monitor and report the availability of online courses. Given a course URL, it checks for the presence of an enrollment button and notifies whether the course is available for enrollment. Stay informed about course availability effortlessly with CourseEnrollmentChecker
+# Course Availability Checker with Selenium and Swing GUI
+This repository contains a versatile Java application that leverages Selenium for web automation and features a user-friendly Swing-based GUI. Use it to check the availability of online courses by providing the course URL and wait time. The GUI makes it accessible to both technical and non-technical users, and dialog messages provide clear feedback on course availability. Customize the Selenium automation logic to suit your needs. Streamline your course monitoring process with this tool.
