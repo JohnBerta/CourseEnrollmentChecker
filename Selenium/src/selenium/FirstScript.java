@@ -14,8 +14,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class FirstScript extends JFrame {
-	
-	private JTextField urlField;
+
+    private static final long serialVersionUID = 1L;
+    private JTextField urlField;
     private JTextField waitTimeField;
 
     public FirstScript() {
@@ -52,7 +53,7 @@ public class FirstScript extends JFrame {
 
         add(panel);
     }
-    
+
     public static boolean checkCourseAvailability(String courseURL, int waitTimeInSeconds) {
         // Setting system properties of ChromeDriver
         System.setProperty("webdriver.chrome.driver", "C:\\Apps\\chromedriver.exe");
@@ -78,10 +79,10 @@ public class FirstScript extends JFrame {
 
             // Check if the enrollment button is visible
             if (enrollButton.isDisplayed()) {
-                System.out.println("Course available: " + courseURL);
+                System.out.println("Course availability status: Available");
                 return true;
             } else {
-                System.out.println("Course not available: " + courseURL);
+                System.out.println("Course availability status: Not Available");
                 return false;
             }
         } catch (Exception e) {
@@ -91,7 +92,7 @@ public class FirstScript extends JFrame {
         }
         return false;
     }
-    
+
     public static void displayResult(boolean isAvailable) {
         String message = isAvailable ? "Course is available!" : "Course is not available.";
         JOptionPane.showMessageDialog(null, message, "Availability Status", isAvailable ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE);
