@@ -1,12 +1,12 @@
 package selenium;
 
-import javax.swing.JFrame;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,13 +25,19 @@ public class FirstScript extends JFrame {
         setSize(400, 200);
         setLocationRelativeTo(null);
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(3, 2));
+        JPanel panel = new JPanel(new GridBagLayout());
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.insets = new Insets(5, 5, 5, 5);
 
         JLabel urlLabel = new JLabel("Course URL:");
-        urlField = new JTextField();
+        urlField = new JTextField(20); // Set the preferred width
         JLabel waitTimeLabel = new JLabel("Wait Time (seconds):");
-        waitTimeField = new JTextField();
+        waitTimeField = new JTextField(5); // Set the preferred width
+
+        JLabel browserLabel = new JLabel("Select Browser:");
+        String[] browsers = {"Chrome", "Firefox", "Edge"}; // Add more as needed
+        JComboBox browserComboBox = new JComboBox<>(browsers);
 
         JButton checkButton = new JButton("Check Availability");
         checkButton.addActionListener(new ActionListener() {
@@ -39,31 +45,70 @@ public class FirstScript extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 String courseURL = urlField.getText();
                 int waitTimeInSeconds = Integer.parseInt(waitTimeField.getText());
+                String selectedBrowser = browserComboBox.getSelectedItem().toString();
 
-                boolean isAvailable = checkCourseAvailability(courseURL, waitTimeInSeconds);
-                displayResult(isAvailable);
+                WebDriver driver = createWebDriver(selectedBrowser);
+                if (driver != null) {
+                    boolean isAvailable = checkCourseAvailability(driver, courseURL, waitTimeInSeconds);
+                    displayResult(isAvailable);
+                    driver.quit();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Unsupported browser selection", "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 
-        panel.add(urlLabel);
-        panel.add(urlField);
-        panel.add(waitTimeLabel);
-        panel.add(waitTimeField);
-        panel.add(checkButton);
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        panel.add(urlLabel, constraints);
+
+        constraints.gridx = 1;
+        panel.add(urlField, constraints);
+
+        constraints.gridx = 0;
+        constraints.gridy = 1;
+        panel.add(waitTimeLabel, constraints);
+
+        constraints.gridx = 1;
+        panel.add(waitTimeField, constraints);
+
+        constraints.gridx = 0;
+        constraints.gridy = 2;
+        panel.add(browserLabel, constraints);
+
+        constraints.gridx = 1;
+        panel.add(browserComboBox, constraints);
+
+        constraints.gridx = 0;
+        constraints.gridy = 3;
+        constraints.gridwidth = 2;
+        panel.add(checkButton, constraints);
 
         add(panel);
     }
+    
+    public static WebDriver createWebDriver(String browser) {
+        WebDriver driver;
+        if ("Chrome".equalsIgnoreCase(browser)) {
+            System.setProperty("webdriver.chrome.driver", "C:\\Apps\\chromedriver.exe");
+            ChromeOptions options = new ChromeOptions();
+            // Set Chrome-specific options if needed
+            driver = new ChromeDriver(options);
+        } else if ("Firefox".equalsIgnoreCase(browser)) {
+            System.setProperty("webdriver.gecko.driver", "C:\\Apps\\geckodriver.exe");
+            FirefoxOptions options = new FirefoxOptions();
+            // Set Firefox-specific options if needed
+            driver = new FirefoxDriver(options);
+        } else {
+            // Handle unsupported browsers or default to a specific browser
+            // You can display an error message to the user in the UI
+            driver = null;
+        }
+        return driver;
+    }
 
-    public static boolean checkCourseAvailability(String courseURL, int waitTimeInSeconds) {
-        // Setting system properties of ChromeDriver
-        System.setProperty("webdriver.chrome.driver", "C:\\Apps\\chromedriver.exe");
 
-        // Optional: You can configure Chrome options, such as running headless
-        ChromeOptions options = new ChromeOptions();
-        // options.addArguments("--headless"); // Uncomment this line to run headless (without a visible browser window)
-
-        WebDriver driver = new ChromeDriver(options);
-
+    public static boolean checkCourseAvailability(WebDriver driver, String courseURL, int waitTimeInSeconds) {
         try {
             // Open the course URL
             driver.get(courseURL);
@@ -74,11 +119,11 @@ public class FirstScript extends JFrame {
             // Wait for the specified time (in seconds)
             Thread.sleep(waitTimeInSeconds * 1000);
 
-            // For demonstration purposes, let's assume we're looking for an "Enroll" button
-            WebElement enrollButton = driver.findElement(By.className("rc-StartDateButton"));
+         // Find the element with the specified class name
+            WebElement courseIndicator = driver.findElement(By.className("css-1qci13h"));
 
-            // Check if the enrollment button is visible
-            if (enrollButton.isDisplayed()) {
+            // Check if the course indicator element is present
+            if (courseIndicator != null) {
                 System.out.println("Course availability status: Available");
                 return true;
             } else {
@@ -87,11 +132,10 @@ public class FirstScript extends JFrame {
             }
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
-        } finally {
-            driver.quit();
         }
         return false;
     }
+
 
     public static void displayResult(boolean isAvailable) {
         String message = isAvailable ? "Course is available!" : "Course is not available.";
